@@ -3,6 +3,7 @@ package com.developgmail.mitroshin.photogallery;
 import android.net.Uri;
 import android.util.Log;
 
+import com.developgmail.mitroshin.photogallery.GsonPhotos.PhotosBean.PhotoBean;
 import com.google.gson.Gson;
 
 import java.io.ByteArrayOutputStream;
@@ -50,16 +51,16 @@ public class FlickrFetchr {
     public List<GalleryItem> fetchItems() {
         List<GalleryItem> items = new ArrayList<>();
         try {
-            String url = getRecentQuery();
+            String url = getQueryToApiMethodGetRecent();
             String jsonString = getUrlString(url);
-            items = fillListFromJson(items, jsonString);
+            items = getGalleryItemsGroupFromJsonPhotosGroup(items, jsonString);
         } catch (IOException e) {
             Log.e(TAG, "Failed to fetch items: ", e);
         }
         return items;
     }
 
-    private String getRecentQuery() {
+    private String getQueryToApiMethodGetRecent() {
         return Uri.parse("https://api.flickr.com/services/rest/")
                 .buildUpon()
                 .appendQueryParameter("method", "flickr.photos.getRecent")
@@ -70,16 +71,26 @@ public class FlickrFetchr {
                 .build().toString();
     }
 
-    private List<GalleryItem> fillListFromJson(List<GalleryItem> listOfItems, String jsonString) {
-        Gson gson = new Gson();
-        GsonPhotos gsonPhotos = gson.fromJson(jsonString, GsonPhotos.class);
-        for (GsonPhotos.PhotosBean.PhotoBean photo : gsonPhotos.getPhotos().getPhoto()) {
-            GalleryItem item = new GalleryItem();
-            item.setId(photo.getId());
-            item.setCaption(photo.getTitle());
-            item.setUrl(photo.getUrl_s());
-            listOfItems.add(item);
+    private List<GalleryItem> getGalleryItemsGroupFromJsonPhotosGroup(List<GalleryItem> itemsGroup, String jsonPhotosGroupString) {
+        GsonPhotos gsonPhotosGroup = getGsonPhotosGroupFromJson(jsonPhotosGroupString);
+        for (PhotoBean gsonPhoto : gsonPhotosGroup.getPhotos().getPhoto()) {
+            GalleryItem galleryItem = getGalleryItemFromGsonPhoto(gsonPhoto);
+            itemsGroup.add(galleryItem);
         }
-        return listOfItems;
+        return itemsGroup;
+    }
+
+    private GsonPhotos getGsonPhotosGroupFromJson(String jsonString) {
+        Gson gson = new Gson();
+        return gson.fromJson(jsonString, GsonPhotos.class);
+    }
+
+    private GalleryItem getGalleryItemFromGsonPhoto(PhotoBean gsonPhoto) {
+        GalleryItem item = new GalleryItem();
+        item.setId(gsonPhoto.getId());
+        item.setCaption(gsonPhoto.getTitle());
+        item.setUrl(gsonPhoto.getUrl_s());
+
+        return item;
     }
 }
