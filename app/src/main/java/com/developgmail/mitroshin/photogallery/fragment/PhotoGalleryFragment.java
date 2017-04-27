@@ -1,4 +1,4 @@
-package com.developgmail.mitroshin.photogallery;
+package com.developgmail.mitroshin.photogallery.fragment;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -10,6 +10,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import com.developgmail.mitroshin.photogallery.FlickrFetchr;
+import com.developgmail.mitroshin.photogallery.model.GalleryItem;
+import com.developgmail.mitroshin.photogallery.R;
 
 import java.util.ArrayList;
 import java.util.List;

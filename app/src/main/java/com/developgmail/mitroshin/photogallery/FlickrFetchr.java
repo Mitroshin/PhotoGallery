@@ -3,7 +3,9 @@ package com.developgmail.mitroshin.photogallery;
 import android.net.Uri;
 import android.util.Log;
 
-import com.developgmail.mitroshin.photogallery.GsonPhotos.PhotosBean.PhotoBean;
+import com.developgmail.mitroshin.photogallery.model.GalleryItem;
+import com.developgmail.mitroshin.photogallery.model.GsonPhotos;
+import com.developgmail.mitroshin.photogallery.model.GsonPhotos.PhotosBean.PhotoBean;
 import com.google.gson.Gson;
 
 import java.io.ByteArrayOutputStream;
@@ -49,15 +51,14 @@ public class FlickrFetchr {
     }
 
     public List<GalleryItem> fetchItems() {
-        List<GalleryItem> items = new ArrayList<>();
+        List<GalleryItem> galleryItemGroup = new ArrayList<>();
         try {
-            String url = getQueryToApiMethodGetRecent();
-            String jsonString = getUrlString(url);
-            items = getGalleryItemsGroupFromJsonPhotosGroup(items, jsonString);
+            String jsonGetRecentAnswer = getUrlString(getQueryToApiMethodGetRecent());
+            galleryItemGroup = fillGalleryItemGroupFromJsonPhotosGroup(galleryItemGroup, jsonGetRecentAnswer);
         } catch (IOException e) {
             Log.e(TAG, "Failed to fetch items: ", e);
         }
-        return items;
+        return galleryItemGroup;
     }
 
     private String getQueryToApiMethodGetRecent() {
@@ -71,16 +72,16 @@ public class FlickrFetchr {
                 .build().toString();
     }
 
-    private List<GalleryItem> getGalleryItemsGroupFromJsonPhotosGroup(List<GalleryItem> itemsGroup, String jsonPhotosGroupString) {
-        GsonPhotos gsonPhotosGroup = getGsonPhotosGroupFromJson(jsonPhotosGroupString);
-        for (PhotoBean gsonPhoto : gsonPhotosGroup.getPhotos().getPhoto()) {
+    private List<GalleryItem> fillGalleryItemGroupFromJsonPhotosGroup(List<GalleryItem> galleryItemGroup, String jsonPhotosGroupString) {
+        GsonPhotos gsonPhotoGroup = getGsonPhotoGroupFromJson(jsonPhotosGroupString);
+        for (PhotoBean gsonPhoto : gsonPhotoGroup.getPhotos().getPhoto()) {
             GalleryItem galleryItem = getGalleryItemFromGsonPhoto(gsonPhoto);
-            itemsGroup.add(galleryItem);
+            galleryItemGroup.add(galleryItem);
         }
-        return itemsGroup;
+        return galleryItemGroup;
     }
 
-    private GsonPhotos getGsonPhotosGroupFromJson(String jsonString) {
+    private GsonPhotos getGsonPhotoGroupFromJson(String jsonString) {
         Gson gson = new Gson();
         return gson.fromJson(jsonString, GsonPhotos.class);
     }

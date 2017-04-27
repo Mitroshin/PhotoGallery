@@ -1,4 +1,4 @@
-package com.developgmail.mitroshin.photogallery;
+package com.developgmail.mitroshin.photogallery.model;
 
 import java.util.List;
 
