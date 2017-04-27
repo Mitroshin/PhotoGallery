@@ -24,14 +24,17 @@ public class FlickrFetchr {
     public byte[] getUrlBytes(String urlSpec) throws IOException {
         URL url = new URL(urlSpec);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+            return someName(connection);
+        } else {
+            throw new IOException(connection.getResponseMessage() + ": with " + urlSpec);
+        }
+    }
 
+    private byte[] someName(HttpURLConnection connection) throws IOException{
         try {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             InputStream inputStream = connection.getInputStream();
-
-            if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                throw new IOException(connection.getResponseMessage() + ": with " + urlSpec);
-            }
 
             int bytesRead = 0;
             byte[] buffer = new byte[1024];

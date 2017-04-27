@@ -21,7 +21,7 @@ import java.util.List;
 public class PhotoGalleryFragment extends Fragment {
     public static final String TAG = "PhotoGalleryFragment";
 
-    private List<GalleryItem> mItems = new ArrayList<>();
+    private List<GalleryItem> mGalleryItemGroup = new ArrayList<>();
 
     private View mViewLayout;
     private RecyclerView mPhotoRecyclerView;
@@ -61,23 +61,23 @@ public class PhotoGalleryFragment extends Fragment {
             return new FlickrFetchr().fetchItems();
         }
         @Override
-        protected void onPostExecute(List<GalleryItem> items) {
-            mItems = items;
+        protected void onPostExecute(List<GalleryItem> galleryItemGroup) {
+            mGalleryItemGroup = galleryItemGroup;
             setupAdapter();
         }
     }
 
     private void setupAdapter() {
         if (isAdded()) {
-            mPhotoRecyclerView.setAdapter(new PhotoAdapter(mItems));
+            mPhotoRecyclerView.setAdapter(new PhotoAdapter(mGalleryItemGroup));
         }
     }
 
     private class PhotoAdapter extends RecyclerView.Adapter<PhotoHolder> {
         private List<GalleryItem> mGalleryItems;
 
-        public PhotoAdapter(List<GalleryItem> galleryItems) {
-            mGalleryItems = galleryItems;
+        public PhotoAdapter(List<GalleryItem> galleryItemGroup) {
+            mGalleryItems = galleryItemGroup;
         }
 
         @Override
