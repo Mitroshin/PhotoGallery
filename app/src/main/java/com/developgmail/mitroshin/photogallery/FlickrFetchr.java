@@ -21,6 +21,28 @@ public class FlickrFetchr {
     public static final String TAG = "FlickrFetchr";
     public static final String API_KEY = "e6cfa93d66603917c9d5be0b8f54d129";
 
+    public List<GalleryItem> fetchGalleryItemGroup() {
+        List<GalleryItem> galleryItemGroup = new ArrayList<>();
+        String jsonGetRecentAnswer = getUrlString(getQueryToApiMethodGetRecent());
+        galleryItemGroup = fillGalleryItemGroupFromJsonPhotosGroup(galleryItemGroup, jsonGetRecentAnswer);
+        return galleryItemGroup;
+    }
+
+    private String getQueryToApiMethodGetRecent() {
+        return Uri.parse("https://api.flickr.com/services/rest/")
+                .buildUpon()
+                .appendQueryParameter("method", "flickr.photos.getRecent")
+                .appendQueryParameter("api_key", API_KEY)
+                .appendQueryParameter("format", "json")
+                .appendQueryParameter("nojsoncallback", "1")
+                .appendQueryParameter("extras", "url_s")
+                .build().toString();
+    }
+
+    public String getUrlString(String urlSpec) {
+        return new String(getUrlBytes(urlSpec));
+    }
+
     public byte[] getUrlBytes(String urlSpec) {
         HttpURLConnection connection = getConnectionByUrl(urlSpec);
         return readByteArrayByConnection(connection);
@@ -65,32 +87,6 @@ public class FlickrFetchr {
             outputStream.write(buffer, 0, bytesRead);
         }
         return outputStream.toByteArray();
-    }
-
-    public String getUrlString(String urlSpec) throws IOException {
-        return new String(getUrlBytes(urlSpec));
-    }
-
-    public List<GalleryItem> fetchGalleryItemGroup() {
-        List<GalleryItem> galleryItemGroup = new ArrayList<>();
-        try {
-            String jsonGetRecentAnswer = getUrlString(getQueryToApiMethodGetRecent());
-            galleryItemGroup = fillGalleryItemGroupFromJsonPhotosGroup(galleryItemGroup, jsonGetRecentAnswer);
-        } catch (IOException e) {
-            Log.e(TAG, "Failed to fetch items: ", e);
-        }
-        return galleryItemGroup;
-    }
-
-    private String getQueryToApiMethodGetRecent() {
-        return Uri.parse("https://api.flickr.com/services/rest/")
-                .buildUpon()
-                .appendQueryParameter("method", "flickr.photos.getRecent")
-                .appendQueryParameter("api_key", API_KEY)
-                .appendQueryParameter("format", "json")
-                .appendQueryParameter("nojsoncallback", "1")
-                .appendQueryParameter("extras", "url_s")
-                .build().toString();
     }
 
     private List<GalleryItem> fillGalleryItemGroupFromJsonPhotosGroup(List<GalleryItem> galleryItemGroup, String jsonPhotosGroupString) {
