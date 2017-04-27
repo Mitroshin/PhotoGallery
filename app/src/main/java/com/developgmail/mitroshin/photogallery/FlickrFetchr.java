@@ -21,39 +21,57 @@ public class FlickrFetchr {
     public static final String TAG = "FlickrFetchr";
     public static final String API_KEY = "e6cfa93d66603917c9d5be0b8f54d129";
 
-    public byte[] getUrlBytes(String urlSpec) throws IOException {
+    public byte[] getUrlBytes(String urlSpec) {
+        HttpURLConnection connection = getConnectionByUrl(urlSpec);
+        return readByteArrayByConnection(connection);
+    }
+
+    private HttpURLConnection getConnectionByUrl(String urlSpec)  {
+        try {
+            return tryToGetConnectionByUrl(urlSpec);
+        } catch (IOException e) {
+            Log.e(TAG, "Connection not established : " + e);
+        }
+        return null;
+    }
+
+    private HttpURLConnection tryToGetConnectionByUrl(String urlSpec) throws IOException {
         URL url = new URL(urlSpec);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-            return someName(connection);
+            return connection;
         } else {
             throw new IOException(connection.getResponseMessage() + ": with " + urlSpec);
         }
     }
 
-    private byte[] someName(HttpURLConnection connection) throws IOException{
+    private byte[] readByteArrayByConnection(HttpURLConnection connection) {
         try {
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            InputStream inputStream = connection.getInputStream();
-
-            int bytesRead = 0;
-            byte[] buffer = new byte[1024];
-
-            while ((bytesRead = inputStream.read(buffer)) > 0) {
-                outputStream.write(buffer, 0, bytesRead);
-            }
-            outputStream.close();
-            return outputStream.toByteArray();
+            return tryToReadByteArrayByConnection(connection);
+        } catch (IOException e) {
+            Log.e(TAG, "Error reading data: " + e);
         } finally {
             connection.disconnect();
         }
+        return null;
+    }
+
+    private byte[] tryToReadByteArrayByConnection(HttpURLConnection connection) throws IOException {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        InputStream inputStream = connection.getInputStream();
+        int bytesRead = 0;
+        byte[] buffer = new byte[1024];
+        while ((bytesRead = inputStream.read(buffer)) > 0) {
+            outputStream.write(buffer, 0, bytesRead);
+        }
+        return outputStream.toByteArray();
     }
 
     public String getUrlString(String urlSpec) throws IOException {
         return new String(getUrlBytes(urlSpec));
     }
 
-    public List<GalleryItem> fetchItems() {
+    public List<GalleryItem> fetchGalleryItemGroup() {
         List<GalleryItem> galleryItemGroup = new ArrayList<>();
         try {
             String jsonGetRecentAnswer = getUrlString(getQueryToApiMethodGetRecent());
